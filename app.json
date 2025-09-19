@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "CPR Beats",
+    "slug": "cpr-beats",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F14"
+    },
+    
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.etienne.cprbeats"
+    },
+    "android": {
+      "package": "com.etienne.cprbeats",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-foreground.png",
+        "backgroundColor": "#0B0F14"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#0B0F14",
+      "barStyle": "light-content",
+      "visible": "inset-swipe"
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-mail-composer",
+      "react-native-iap",
+      "expo-navigation-bar"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "85023973-767d-44ef-8dff-8925008c6591"
+      }
+    }
+  }
+}
