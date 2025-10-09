@@ -21,7 +21,7 @@
           import ProInfoSheet from '../components/ProInfoSheet';
           import PaywallSheet from '../components/PaywallSheet';
           import { useEntitlement } from '../features/pro/entitlement';
-          import { Platform, NativeModules } from 'react-native';
+          import { Platform } from 'react-native';
           
 
           export default function CPRScreen() {
@@ -76,21 +76,7 @@
 
           const proPhaseRef = useRef('compressions');
 // Couleur de la barre de navigation Android (suivre le thème)
-useEffect(() => {
-  if (Platform.OS !== 'android') return;
 
-  // Vérifie que le module natif existe dans ce build
-  const hasNavBar = !!NativeModules?.ExpoNavigationBar;
-  if (!hasNavBar) return; // => ne rien faire, pas d’erreur
-
-  // Importer seulement si présent
-  const NavigationBar = require('expo-navigation-bar');
-
-  const bg = theme?.colors?.background ?? '#0B0F14';
-  NavigationBar.setBackgroundColorAsync(bg).catch(() => {});
-  NavigationBar.setButtonStyleAsync(isDark ? 'light' : 'dark').catch(() => {});
-  NavigationBar.setBehaviorAsync('inset-swipe').catch(() => {});
-}, [isDark, theme?.colors?.background]);
 
           // Cible par phase pour calculer la progression
           const ratioCfg = useMemo(
