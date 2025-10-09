@@ -8,6 +8,9 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout
@@ -54,9 +57,10 @@ jobs:
         working-directory: android
         run: chmod +x gradlew
 
+      # Build (on utilise le wrapper)
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew clean assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

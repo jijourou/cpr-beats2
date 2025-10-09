@@ -84,6 +84,8 @@ export const STRINGS = {
     paywall_bullet_breath_overlay: "Signal insufflations + barre de progression",
     paywall_bullet_counters: "Compteurs choc/adré/amio + historique & export",
     pro_info_a11y: "Informations sur les cycles",
+    tips_title: "Soutenir l’app (pourboires)",
+    tips_note: "Merci pour votre soutien ❤️ (les pourboires n’ajoutent pas de fonctionnalité)."
     },
   
     en: {
@@ -170,6 +172,9 @@ export const STRINGS = {
         paywall_bullet_breath_overlay: "Breath cues + progress bar",
         paywall_bullet_counters: "Shock/epinephrine/amiodarone counters + history & export",
         pro_info_a11y: "Compression cycle information",
+        tips_title: "Support the app (tips)",
+        tips_note: "Thank you for your support ❤️ (tips do not unlock extra features)."
+
 
     },
   };
