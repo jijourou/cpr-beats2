@@ -52,23 +52,10 @@ jobs:
       - name: Install deps
         run: npm ci || npm install
 
-      # DEBUG: vois si gradlew est bien là
-      - name: List android folder
-        run: |
-          ls -la
-          ls -la android
-          test -f android/gradlew || (echo "gradlew manquant !" && exit 1)
-
-      # Si le fichier a des fins de lignes Windows, corrige-les
-      - name: Fix line endings (gradlew)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y dos2unix
-          dos2unix android/gradlew || true
-
-      # Donne le droit d’exécut’
+      # <<< Fix permission >>>
       - name: Make gradlew executable
-        run: chmod +x android/gradlew
+        working-directory: android
+        run: chmod +x gradlew
 
       # Build (on utilise le wrapper)
       - name: Build debug APK
