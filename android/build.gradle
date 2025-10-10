@@ -1,3 +1,9 @@
+ext {
+  // fallback si la propriété n'est pas vue dans gradle.properties
+  hermesEnabled = (findProperty('hermesEnabled') ?: 'true').toBoolean()
+  newArchEnabled = (findProperty('newArchEnabled') ?: 'false').toBoolean()
+}
+
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
