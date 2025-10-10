@@ -1,71 +1,59 @@
 name: Android AAB (signed)
 
 on:
-  workflow_dispatch: {}         # bouton "Run workflow"
-  push:
-    branches: [ main ]          # (facultatif) build à chaque push sur main
+  workflow_dispatch: {}   # permet de le lancer manuellement
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      # On récupère les secrets (tu les as créés à l'étape précédente)
-      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up Java (JDK 17)
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 17
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
 
-      # Android SDK est déjà présent sur ubuntu-latest.
-      # On indique à Gradle où il se trouve.
-      - name: Create local.properties (sdk.dir)
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install npm deps
+        run: npm ci
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Decode keystore from secret
         run: |
-          echo "sdk.dir=$ANDROID_SDK_ROOT" > android/local.properties
-          cat android/local.properties
+          mkdir -p android/app
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
 
-      # Recréer le keystore à partir du secret Base64
-      - name: Restore keystore from secret
-        working-directory: android/app
-        shell: bash
+      - name: Create gradle.properties with signing vars
         run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > upload-keystore.jks
-          ls -l upload-keystore.jks
+          cat > android/gradle.properties <<'EOF'
+          MYAPP_UPLOAD_STORE_FILE=app/upload-keystore.jks
+          MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
+          MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
 
-      # Configurer la signature release via gradle.properties (lu dans app/build.gradle)
-      - name: Configure signing in gradle.properties
+      - name: Build AAB (release)
         working-directory: android
-        run: |
-          {
-            echo "MYAPP_UPLOAD_STORE_FILE=app/upload-keystore.jks"
-            echo "MYAPP_UPLOAD_STORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD"
-            echo "MYAPP_UPLOAD_KEY_ALIAS=$ANDROID_KEY_ALIAS"
-            echo "MYAPP_UPLOAD_KEY_PASSWORD=$ANDROID_KEY_PASSWORD"
-          } >> gradle.properties
-          echo "---- gradle.properties ----"
-          sed 's/=.*/=****/g' gradle.properties  # masque les valeurs pour les logs
+        run: ./gradlew bundleRelease --no-daemon
 
-      - name: Grant execute permission for Gradle
-        working-directory: android
-        run: chmod +x ./gradlew
-
-      # ⚠️ construit un AAB (bundleRelease)
-      - name: Build AAB
-        working-directory: android
-        run: ./gradlew :app:bundleRelease --no-daemon
-
-      # Publie l’artéfact pour téléchargement
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: app-release.aab
+          name: app-release
           path: android/app/build/outputs/bundle/release/app-release.aab
