@@ -1,7 +1,11 @@
 name: Android AAB (signed)
 
 on:
-  workflow_dispatch: {}   # permet de le lancer manuellement
+  workflow_dispatch: {}
+
+env:
+  ORG_GRADLE_PROJECT_android_useAndroidX: "true"
+  ORG_GRADLE_PROJECT_android_enableJetifier: "true"
 
 jobs:
   build:
@@ -32,25 +36,36 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
+      - name: Clean Gradle caches
+        run: |
+          rm -rf ~/.gradle/caches
+          rm -rf ~/.gradle/daemon
+          rm -rf android/.gradle
+          cd android
+          ./gradlew clean
+
       - name: Decode keystore from secret
         run: |
           mkdir -p android/app
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
-        env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
 
-      - name: Create gradle.properties with signing vars
+      # ⬇️ IMPORTANT : on AJOUTE à gradle.properties (>>), on ne l'écrase plus
+      - name: Append signing vars to gradle.properties
         run: |
-          cat > android/gradle.properties <<'EOF'
-          MYAPP_UPLOAD_STORE_FILE=app/upload-keystore.jks
-          MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}
-          MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}
-          EOF
+          {
+            echo "";
+            echo "MYAPP_UPLOAD_STORE_FILE=app/upload-keystore.jks";
+            echo "MYAPP_UPLOAD_STORE_PASSWORD=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}";
+            echo "MYAPP_UPLOAD_KEY_ALIAS=${{ secrets.ANDROID_KEY_ALIAS }}";
+            echo "MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}";
+          } >> android/gradle.properties
+
+          echo "---- gradle.properties (dernières lignes) ----"
+          tail -n 50 android/gradle.properties | sed 's/.*PASSWORD.*/MYAPP_UPLOAD_***=*** (masqué)/g'
 
       - name: Build AAB (release)
         working-directory: android
-        run: ./gradlew bundleRelease --no-daemon
+        run: ./gradlew bundleRelease --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
