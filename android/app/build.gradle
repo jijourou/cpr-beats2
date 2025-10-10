@@ -109,15 +109,17 @@ android {
     keyPassword 'android'
   }
   release {
-    // ⚠️ Ces propriétés sont injectées par gradle.properties (workflow GitHub)
-    if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-      storeFile file(MYAPP_UPLOAD_STORE_FILE)
-      storePassword MYAPP_UPLOAD_STORE_PASSWORD
-      keyAlias MYAPP_UPLOAD_KEY_ALIAS
-      keyPassword MYAPP_UPLOAD_KEY_PASSWORD
-    }
+    // Le workflow dépose ce fichier dans android/app/
+    storeFile file('release.keystore')
+
+    // Secrets GitHub (CI) → System.getenv ; fallback sur gradle.properties (local)
+    storePassword System.getenv('MYAPP_UPLOAD_STORE_PASSWORD') ?: (findProperty('MYAPP_UPLOAD_STORE_PASSWORD') ?: "")
+    keyAlias      System.getenv('MYAPP_UPLOAD_KEY_ALIAS')      ?: (findProperty('MYAPP_UPLOAD_KEY_ALIAS')      ?: "")
+    keyPassword   System.getenv('MYAPP_UPLOAD_KEY_PASSWORD')   ?: (findProperty('MYAPP_UPLOAD_KEY_PASSWORD')   ?: "")
   }
 }
+
+
 
     buildTypes {
   debug {
