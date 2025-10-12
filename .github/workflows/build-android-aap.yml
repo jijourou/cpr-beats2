@@ -50,18 +50,15 @@ jobs:
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
 
       # ⬇️ IMPORTANT : on AJOUTE à gradle.properties (>>), on ne l'écrase plus
-     - name: Append signing vars to gradle.properties
+   - name: Append signing vars to gradle.properties
   run: |
     {
-      printf "MYAPP_UPLOAD_STORE_FILE=app/upload-keystore.jks\n"
-      printf "MYAPP_UPLOAD_STORE_PASSWORD=%q\n" "$ANDROID_KEYSTORE_PASSWORD"
-      printf "MYAPP_UPLOAD_KEY_ALIAS=%q\n" "$ANDROID_KEY_ALIAS"
-      printf "MYAPP_UPLOAD_KEY_PASSWORD=%q\n" "$ANDROID_KEY_PASSWORD"
+      echo "MYAPP_UPLOAD_STORE_FILE=app/upload-keystore.jks"
+      echo "MYAPP_UPLOAD_STORE_PASSWORD='${{ secrets.ANDROID_KEYSTORE_PASSWORD }}'"
+      echo "MYAPP_UPLOAD_KEY_ALIAS='${{ secrets.ANDROID_KEY_ALIAS }}'"
+      echo "MYAPP_UPLOAD_KEY_PASSWORD='${{ secrets.ANDROID_KEY_PASSWORD }}'"
     } >> android/gradle.properties
-  env:
-    ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-    ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-    ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
 
 
           - name: Show last lines of gradle.properties (debug)
