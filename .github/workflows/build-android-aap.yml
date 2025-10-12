@@ -70,6 +70,16 @@ jobs:
       - name: Build AAB (release)
         working-directory: android
         run: ./gradlew bundleRelease --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true
+     
+      - name: Build APK (release)
+        working-directory: android
+        run: ./gradlew assembleRelease --no-daemon -Pandroid.useAndroidX=true -Pandroid.enableJetifier=true
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
