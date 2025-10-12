@@ -60,6 +60,10 @@ jobs:
             echo "MYAPP_UPLOAD_KEY_PASSWORD=${{ secrets.ANDROID_KEY_PASSWORD }}";
           } >> android/gradle.properties
 
+
+          - name: Show last lines of gradle.properties (debug)
+          run: tail -n 20 android/gradle.properties
+
           echo "---- gradle.properties (dernières lignes) ----"
           tail -n 50 android/gradle.properties | sed 's/.*PASSWORD.*/MYAPP_UPLOAD_***=*** (masqué)/g'
 
