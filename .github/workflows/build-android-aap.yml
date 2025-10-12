@@ -18,14 +18,14 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Set up Java (JDK 17)
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'gradle'
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
@@ -49,23 +49,23 @@ jobs:
           mkdir -p android/app
           echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/upload-keystore.jks
 
-      # ⬇️ IMPORTANT : on AJOUTE à gradle.properties (>>), on ne l'écrase plus
-   - name: Append signing vars to gradle.properties
-  run: |
-    {
-      echo "MYAPP_UPLOAD_STORE_FILE=app/upload-keystore.jks"
-      echo "MYAPP_UPLOAD_STORE_PASSWORD='${{ secrets.ANDROID_KEYSTORE_PASSWORD }}'"
-      echo "MYAPP_UPLOAD_KEY_ALIAS='${{ secrets.ANDROID_KEY_ALIAS }}'"
-      echo "MYAPP_UPLOAD_KEY_PASSWORD='${{ secrets.ANDROID_KEY_PASSWORD }}'"
-    } >> android/gradle.properties
+      - name: Append signing vars to gradle.properties
+        run: |
+          {
+            printf "MYAPP_UPLOAD_STORE_FILE=app/upload-keystore.jks\n"
+            printf "MYAPP_UPLOAD_STORE_PASSWORD=%q\n" "${ANDROID_KEYSTORE_PASSWORD}"
+            printf "MYAPP_UPLOAD_KEY_ALIAS=%q\n" "${ANDROID_KEY_ALIAS}"
+            printf "MYAPP_UPLOAD_KEY_PASSWORD=%q\n" "${ANDROID_KEY_PASSWORD}"
+          } >> android/gradle.properties
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-
-
-          - name: Show last lines of gradle.properties (debug)
-          run: tail -n 20 android/gradle.properties
-
-          echo "---- gradle.properties (dernières lignes) ----"
-          tail -n 50 android/gradle.properties | sed 's/.*PASSWORD.*/MYAPP_UPLOAD_***=*** (masqué)/g'
+      - name: Show last lines of gradle.properties (debug)
+        run: |
+          echo "---- gradle.properties (last lines) ----"
+          tail -n 50 android/gradle.properties | sed -E 's/(PASSWORD=).*/\1*** (masked)/g'
 
       - name: Build AAB (release)
         working-directory: android
