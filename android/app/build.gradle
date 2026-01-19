@@ -103,9 +103,7 @@ android {
       "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
 
   
-    ndk {
-      abiFilters "armeabi-v7a"
-    }
+   
   }
 
  
