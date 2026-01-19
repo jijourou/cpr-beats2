@@ -86,75 +86,79 @@ def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 def hermesEnabled = (findProperty('hermesEnabled') ?: 'true')
 
 android {
-    ndkVersion rootProject.ext.ndkVersion
+  ndkVersion rootProject.ext.ndkVersion
+  buildToolsVersion rootProject.ext.buildToolsVersion
+  compileSdk rootProject.ext.compileSdkVersion
 
-    buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdk rootProject.ext.compileSdkVersion
+  namespace 'com.etienne.cprbeats'
 
-    namespace 'com.etienne.cprbeats'
-    defaultConfig {
-        applicationId 'com.etienne.cprbeats'
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 10
-        versionName "1.0.0"
+  defaultConfig {
+    applicationId 'com.etienne.cprbeats'
+    minSdkVersion rootProject.ext.minSdkVersion
+    targetSdkVersion rootProject.ext.targetSdkVersion
+    versionCode 10
+    versionName "1.0.0"
 
-        buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
-        ndk {
-        abiFilters "armeabi-v7a"
-        }
-        splits {
+    buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL",
+      "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
+
+  
+    ndk {
+      abiFilters "armeabi-v7a"
+    }
+  }
+
+ 
+  splits {
     abi {
       enable false
     }
-    }
-    signingConfigs {
-  debug {
-    storeFile file('debug.keystore')
-    storePassword 'android'
-    keyAlias 'androiddebugkey'
-    keyPassword 'android'
   }
-release {
-    // On lit les 4 variables (depuis gradle.properties OU ORG_GRADLE_PROJECT_*)
-    if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-      storeFile file("$rootDir/${MYAPP_UPLOAD_STORE_FILE}")
-      storePassword MYAPP_UPLOAD_STORE_PASSWORD
-      keyAlias MYAPP_UPLOAD_KEY_ALIAS
-      keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+
+  signingConfigs {
+    debug {
+      storeFile file('debug.keystore')
+      storePassword 'android'
+      keyAlias 'androiddebugkey'
+      keyPassword 'android'
     }
+    release {
+      if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+        storeFile file("$rootDir/${MYAPP_UPLOAD_STORE_FILE}")
+        storePassword MYAPP_UPLOAD_STORE_PASSWORD
+        keyAlias MYAPP_UPLOAD_KEY_ALIAS
+        keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+      }
+    }
+  }
+
+  buildTypes {
+    debug {
+      signingConfig signingConfigs.debug
+    }
+    release {
+      signingConfig signingConfigs.release
+      minifyEnabled false
+      shrinkResources false
+      proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+
+      def enablePngCrunchInRelease = findProperty('android.enablePngCrunchInReleaseBuilds') ?: 'true'
+      crunchPngs enablePngCrunchInRelease.toBoolean()
+    }
+  }
+
+  packagingOptions {
+    jniLibs {
+      def enableLegacyPackaging = findProperty('expo.useLegacyPackaging') ?: 'false'
+      useLegacyPackaging enableLegacyPackaging.toBoolean()
+    }
+  }
+
+  androidResources {
+    ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
   }
 }
 
-
-    buildTypes {
-  debug {
-    signingConfig signingConfigs.debug
-  }
-  release {
-    // ✅ on signe avec la clé release (plus *avec la debug*)
-    signingConfig signingConfigs.release
-
-    // pour la stabilité pendant la mise en place
-    minifyEnabled false
-    shrinkResources false
-    proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-
-    def enablePngCrunchInRelease = findProperty('android.enablePngCrunchInReleaseBuilds') ?: 'true'
-    crunchPngs enablePngCrunchInRelease.toBoolean()
-  }
-}
-
-    packagingOptions {
-        jniLibs {
-            def enableLegacyPackaging = findProperty('expo.useLegacyPackaging') ?: 'false'
-            useLegacyPackaging enableLegacyPackaging.toBoolean()
-        }
-    }
-    androidResources {
-        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
-    }
-}
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
 // Accepts values in comma delimited lists, example:
