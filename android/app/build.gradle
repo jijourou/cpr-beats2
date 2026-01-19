@@ -96,7 +96,7 @@ android {
     applicationId 'com.etienne.cprbeats'
     minSdkVersion rootProject.ext.minSdkVersion
     targetSdkVersion rootProject.ext.targetSdkVersion
-    versionCode 11
+    versionCode 12
     versionName "1.0.0"
 
     buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL",
